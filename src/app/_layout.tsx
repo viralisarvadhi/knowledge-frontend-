@@ -4,6 +4,10 @@ import { Provider } from 'react-redux';
 import { store, useAppSelector } from '../store';
 import { socketClient } from '../services/socket/socketClient';
 import { registerForPushNotificationsAsync } from '../services/pushNotification';
+import { registerWidgetTaskHandler } from 'react-native-android-widget';
+import { widgetTaskHandler } from '../../widget-task-handler';
+
+registerWidgetTaskHandler(widgetTaskHandler);
 
 function RootLayoutNav() {
     const { token, user } = useAppSelector((state) => state.auth);

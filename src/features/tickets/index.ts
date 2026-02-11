@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { ticketService, CreateTicketData, ResolveTicketData, ResolveResponse } from '../../services/api/ticket.service';
 import { Ticket } from '../../types';
+import { requestWidgetUpdate } from 'react-native-android-widget';
+import { TicketStatsWidget } from '../widgets/TicketStatsWidget';
 
 interface TicketState {
     list: Ticket[];
@@ -110,9 +112,25 @@ const ticketsSlice = createSlice({
             .addCase(fetchTickets.fulfilled, (state, action: PayloadAction<Ticket[] | { tickets: Ticket[] }>) => {
                 state.loading = false;
                 const newTickets = Array.isArray(action.payload) ? action.payload : action.payload.tickets;
+
                 // Deduplicate by ID just in case
                 const uniqueTickets = Array.from(new Map(newTickets.map(item => [item.id, item])).values());
                 state.list = uniqueTickets;
+
+                // Update Widget Stats
+                try {
+                    const open = uniqueTickets.filter(t => t.status === 'open').length;
+                    const inProgress = uniqueTickets.filter(t => t.status === 'in-progress').length;
+                    const resolved = uniqueTickets.filter(t => t.status === 'resolved').length;
+
+                    requestWidgetUpdate({
+                        widgetName: 'TicketStats',
+                        renderWidget: () => TicketStatsWidget({ open, inProgress, resolved }),
+                        widgetNotFound: () => { }
+                    });
+                } catch (error) {
+                    console.error('Failed to update widget:', error);
+                }
             })
             .addCase(fetchTickets.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;

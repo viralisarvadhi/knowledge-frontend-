@@ -33,6 +33,23 @@
       "eas": {
         "projectId": "0a57edde-83f8-427c-bad3-0a2481f7bfa8"
       }
-    }
+    },
+    "plugins": [
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "TicketStats",
+              "label": "Knowledge Stats",
+              "minWidth": "320dp",
+              "minHeight": "120dp",
+              "description": "Shows ticket statistics",
+              "previewImage": "./assets/splash-icon.jpg"
+            }
+          ]
+        }
+      ]
+    ]
   }
 }

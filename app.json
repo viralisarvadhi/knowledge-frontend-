@@ -1,29 +1,38 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Knowledge-base",
+    "slug": "Knowledge-base",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/splash-icon.jpg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash-icon.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sarvadhisolution.knowledgebase",
+      "googleServiceInfoPlist": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/splash-icon.jpg",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.sarvadhisolution.knowledgebase",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/splash-icon.jpg"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0a57edde-83f8-427c-bad3-0a2481f7bfa8"
+      }
     }
   }
 }

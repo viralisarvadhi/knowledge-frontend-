@@ -6,6 +6,7 @@ import { socketClient } from '../services/socket/socketClient';
 import { registerForPushNotificationsAsync } from '../services/pushNotification';
 import { registerWidgetTaskHandler } from 'react-native-android-widget';
 import { widgetTaskHandler } from '../../widget-task-handler';
+import { ThemeProvider } from '../context/ThemeContext';
 
 registerWidgetTaskHandler(widgetTaskHandler);
 
@@ -61,7 +62,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
     return (
         <Provider store={store}>
-            <RootLayoutNav />
+            <ThemeProvider>
+                <RootLayoutNav />
+            </ThemeProvider>
         </Provider>
     );
 }

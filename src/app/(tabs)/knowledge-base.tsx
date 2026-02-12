@@ -13,10 +13,11 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store';
 import { searchSolutions, clearSearchResults } from '../../features/solutions';
 import { Solution } from '../../types';
+import { ImageViewerModal } from '../../components';
+import { useTheme } from '../../context/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const API_ROOT = (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '');
-
-import { ImageViewerModal } from '../../components';
 
 export default function KnowledgeBaseScreen() {
     const [query, setQuery] = useState('');
@@ -24,6 +25,9 @@ export default function KnowledgeBaseScreen() {
     const { searchResults, loading } = useAppSelector((state) => state.solutions);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const handleImagePress = (path: string) => {
         setSelectedImage(`${API_ROOT}${path}`);
@@ -116,10 +120,11 @@ export default function KnowledgeBaseScreen() {
                 <Text style={styles.headerTitle}>Knowledge Base</Text>
             </View>
             <View style={styles.searchContainer}>
+                <Ionicons name="search" size={20} color={colors.placeholder} style={styles.searchIcon} />
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search available solutions..."
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.placeholder}
                     value={query}
                     onChangeText={setQuery}
                     autoCapitalize="none"
@@ -153,58 +158,51 @@ export default function KnowledgeBaseScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
         padding: 16,
         paddingTop: 60,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
         alignItems: 'center'
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: colors.text,
     },
     searchContainer: {
         flexDirection: 'row',
         padding: 16,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
+        alignItems: 'center',
+    },
+    searchIcon: {
+        marginRight: 8,
     },
     searchInput: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: colors.border,
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        marginRight: 8,
-    },
-    searchButton: {
-        backgroundColor: '#007AFF',
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    buttonDisabled: {
-        opacity: 0.6,
-    },
-    searchButtonText: {
-        fontSize: 24,
+        color: colors.text,
+        backgroundColor: colors.inputBackground,
     },
     listContent: {
         padding: 16,
         flexGrow: 1,
     },
     solutionCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
@@ -223,6 +221,7 @@ const styles = StyleSheet.create({
     solutionTitle: {
         fontSize: 16,
         fontWeight: '600',
+        color: colors.text,
     },
     solutionSection: {
         marginBottom: 12,
@@ -230,12 +229,12 @@ const styles = StyleSheet.create({
     sectionLabel: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 4,
     },
     sectionText: {
         fontSize: 14,
-        color: '#333',
+        color: colors.text,
         lineHeight: 20,
     },
     tagsContainer: {
@@ -244,7 +243,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     tag: {
-        backgroundColor: '#E5E5EA',
+        backgroundColor: colors.border,
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: 12,
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     },
     tagText: {
         fontSize: 12,
-        color: '#666',
+        color: colors.placeholder,
     },
     emptyContainer: {
         flex: 1,
@@ -264,12 +263,12 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#666',
+        color: colors.text,
         marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
-        color: '#999',
+        color: colors.placeholder,
     },
     imageScroll: {
         marginTop: 8,
@@ -280,32 +279,32 @@ const styles = StyleSheet.create({
         height: 120,
         borderRadius: 8,
         marginRight: 8,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: colors.border,
     },
     contextContainer: {
-        backgroundColor: '#F8F8FA',
+        backgroundColor: colors.inputBackground,
         padding: 12,
         borderRadius: 8,
         marginBottom: 16,
         borderLeftWidth: 4,
-        borderLeftColor: '#007AFF',
+        borderLeftColor: colors.primary,
     },
     contextHeader: {
         fontSize: 12,
         fontWeight: '700',
-        color: '#007AFF',
+        color: colors.primary,
         textTransform: 'uppercase',
         marginBottom: 4,
     },
     ticketTitle: {
         fontSize: 15,
         fontWeight: 'bold',
-        color: '#000',
+        color: colors.text,
         marginBottom: 4,
     },
     ticketDescription: {
         fontSize: 13,
-        color: '#666',
+        color: colors.placeholder,
         lineHeight: 18,
     },
 });

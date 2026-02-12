@@ -2,13 +2,14 @@ import { Tabs, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import React, { ComponentProps, useState, useCallback, useMemo } from 'react';
 import axiosInstance from '../../services/api/axiosInstance';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function TabLayout() {
     const [unreadCount, setUnreadCount] = useState(0);
+    const { colors } = useTheme();
 
     const fetchUnreadCount = async () => {
         try {
-            // We can re-use the getNotifications endpoint which returns unreadCount
             const response = await axiosInstance.get('/notifications?limit=1');
             setUnreadCount(response.data.unreadCount);
         } catch (error) {
@@ -39,8 +40,6 @@ export default function TabLayout() {
 
         if (socket) {
             socket.on('notification_received', handleNotification);
-
-            // Allow manual triggering of notification event for testing/consistency
             socket.on('notification_updated', handleRead);
         }
 
@@ -55,7 +54,6 @@ export default function TabLayout() {
         };
     }, []);
 
-    // Memoize the base screen options to prevent unnecessary re-renders of child tabs
     const screenOptions = useMemo(() => {
         return ({ route }: { route: { name: string } }) => ({
             headerShown: false,
@@ -84,10 +82,14 @@ export default function TabLayout() {
 
                 return <Ionicons name={iconName} size={size} color={color} />;
             },
-            tabBarActiveTintColor: '#007AFF',
-            tabBarInactiveTintColor: 'gray',
+            tabBarActiveTintColor: colors.primary,
+            tabBarInactiveTintColor: colors.placeholder,
+            tabBarStyle: {
+                backgroundColor: colors.card,
+                borderTopColor: colors.border,
+            },
         });
-    }, []);
+    }, [colors]);
 
     return (
         <Tabs screenOptions={screenOptions}>
@@ -111,7 +113,6 @@ export default function TabLayout() {
                 name="notifications"
                 options={{
                     title: 'Updates',
-                    // Only this part changes when unreadCount updates
                     tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="notifications-outline" size={size} color={color} />

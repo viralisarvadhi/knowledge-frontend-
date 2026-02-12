@@ -20,8 +20,8 @@ import {
     rejectSolution,
     clearError,
 } from '../../features/admin';
-
 import { ImageViewerModal } from '../../components';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ApprovalsScreen() {
     const dispatch = useAppDispatch();
@@ -29,6 +29,8 @@ export default function ApprovalsScreen() {
     const { pendingSolutions, loading, error } = useAppSelector((state) => state.admin);
     const [modalVisible, setModalVisible] = React.useState(false);
     const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const handleImagePress = (path: string) => {
         setSelectedImage(`${process.env.EXPO_PUBLIC_API_URL?.replace('/api', '')}${path}`);
@@ -99,7 +101,7 @@ export default function ApprovalsScreen() {
                                 <TouchableOpacity key={index} onPress={() => handleImagePress(path)}>
                                     <Image
                                         source={{ uri: `${process.env.EXPO_PUBLIC_API_URL?.replace('/api', '')}${path}` }}
-                                        style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: '#f0f0f0' }}
+                                        style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: colors.border }}
                                     />
                                 </TouchableOpacity>
                             ))}
@@ -107,7 +109,7 @@ export default function ApprovalsScreen() {
                     </View>
                 )}
 
-                <View style={{ height: 1, backgroundColor: '#E5E5EA', marginVertical: 16 }} />
+                <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 16 }} />
 
                 <Text style={styles.label}>Root Cause:</Text>
                 <Text style={styles.value}>{item.rootCause}</Text>
@@ -123,7 +125,7 @@ export default function ApprovalsScreen() {
                                 <TouchableOpacity key={index} onPress={() => handleImagePress(path)}>
                                     <Image
                                         source={{ uri: `${process.env.EXPO_PUBLIC_API_URL?.replace('/api', '')}${path}` }}
-                                        style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: '#f0f0f0' }}
+                                        style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: colors.border }}
                                     />
                                 </TouchableOpacity>
                             ))}
@@ -178,12 +180,13 @@ export default function ApprovalsScreen() {
                     <RefreshControl
                         refreshing={loading}
                         onRefresh={() => dispatch(fetchPendingSolutions())}
+                        tintColor={colors.primary}
                     />
                 }
                 ListEmptyComponent={
                     !loading ? (
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="checkmark-done-circle-outline" size={64} color="#C7C7CC" />
+                            <Ionicons name="checkmark-done-circle-outline" size={64} color={colors.placeholder} />
                             <Text style={styles.emptyText}>No solutions pending review</Text>
                         </View>
                     ) : null
@@ -205,10 +208,10 @@ export default function ApprovalsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
         paddingTop: 60,
         backgroundColor: '#FF3B30',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     headerTitle: {
         fontSize: 18,
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         marginBottom: 16,
         padding: 16,
@@ -248,17 +251,17 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#F2F2F7',
+        borderBottomColor: colors.border,
         paddingBottom: 8,
     },
     ticketTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#000',
+        color: colors.text,
     },
     creatorName: {
         fontSize: 14,
-        color: '#666',
+        color: colors.placeholder,
         marginTop: 2,
     },
     statusBadge: {
@@ -278,21 +281,21 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 12,
         fontWeight: 'bold',
-        color: '#666',
+        color: colors.placeholder,
         textTransform: 'uppercase',
         marginTop: 8,
         marginBottom: 2,
     },
     value: {
         fontSize: 16,
-        color: '#333',
+        color: colors.text,
         lineHeight: 22,
     },
     cardActions: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         borderTopWidth: 1,
-        borderTopColor: '#F2F2F7',
+        borderTopColor: colors.border,
         paddingTop: 12,
     },
     actionButton: {
@@ -331,12 +334,13 @@ const styles = StyleSheet.create({
     emptyText: {
         marginTop: 16,
         fontSize: 18,
-        color: '#8E8E93',
+        color: colors.placeholder,
         textAlign: 'center',
     },
     loadingOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backgroundColor: colors.background,
+        opacity: 0.7,
         alignItems: 'center',
         justifyContent: 'center',
     },

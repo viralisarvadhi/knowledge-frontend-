@@ -15,22 +15,25 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { resolveTicket } from '../../features/tickets';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function WriteSolutionScreen() {
     const { ticketId } = useLocalSearchParams<{ ticketId: string }>();
     const [rootCause, setRootCause] = useState('');
     const [fixSteps, setFixSteps] = useState('');
     const [preventionNotes, setPreventionNotes] = useState('');
-    const [tags, setTags] = useState(''); // Comma separated string for UI
+    const [tags, setTags] = useState('');
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { loading } = useAppSelector((state) => state.tickets);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
             quality: 1,
         });
@@ -94,7 +97,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="What caused the issue?"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                         value={rootCause}
                         onChangeText={setRootCause}
                         multiline
@@ -105,7 +108,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="Steps taken to resolve"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                         value={fixSteps}
                         onChangeText={setFixSteps}
                         multiline
@@ -116,7 +119,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="How to prevent recurrence"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                         value={preventionNotes}
                         onChangeText={setPreventionNotes}
                         multiline
@@ -127,7 +130,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="tags (e.g., network, login, bug)"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                         value={tags}
                         onChangeText={setTags}
                     />
@@ -173,10 +176,10 @@ export default function WriteSolutionScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -189,15 +192,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 8,
-        color: '#000',
+        color: colors.text,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: colors.border,
         borderRadius: 8,
         padding: 12,
         marginBottom: 20,
         fontSize: 16,
+        color: colors.text,
+        backgroundColor: colors.inputBackground,
     },
     textArea: {
         textAlignVertical: 'top',
@@ -211,14 +216,14 @@ const styles = StyleSheet.create({
     pickerButton: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#007AFF',
+        borderColor: colors.primary,
         borderRadius: 8,
         padding: 12,
         alignItems: 'center',
         borderStyle: 'dashed',
     },
     pickerButtonText: {
-        color: '#007AFF',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '500',
     },
@@ -233,20 +238,20 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 8,
-        backgroundColor: '#eee',
+        backgroundColor: colors.border,
     },
     removeBadge: {
         position: 'absolute',
         top: -8,
         right: -8,
-        backgroundColor: '#FF3B30',
+        backgroundColor: colors.danger,
         width: 20,
         height: 20,
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#fff',
+        borderColor: colors.card,
     },
     removeText: {
         color: '#fff',
@@ -254,7 +259,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     button: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
         padding: 16,
         borderRadius: 8,
         alignItems: 'center',

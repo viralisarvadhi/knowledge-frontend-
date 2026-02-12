@@ -6,12 +6,15 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Skeleton from '../../components/Skeleton';
 import { User } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function UsersListScreen() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { usersList, loading } = useAppSelector((state) => state.admin);
     const [searchQuery, setSearchQuery] = useState('');
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     useEffect(() => {
         loadUsers();
@@ -58,7 +61,7 @@ export default function UsersListScreen() {
                 <Skeleton width={80} height={16} borderRadius={8} />
             </View>
             <View style={styles.userStats}>
-                <View style={[styles.statRow, { paddingTop: 12, borderTopWidth: 1, borderTopColor: '#F2F2F7' }]}>
+                <View style={[styles.statRow, { paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border }]}>
                     <Skeleton width={40} height={25} />
                     <Skeleton width={40} height={25} style={{ marginLeft: 16 }} />
                     <Skeleton width={40} height={25} style={{ marginLeft: 16 }} />
@@ -107,23 +110,24 @@ export default function UsersListScreen() {
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#000" />
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>All Users</Text>
                 </View>
 
                 <View style={styles.searchContainer}>
-                    <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+                    <Ionicons name="search" size={20} color={colors.placeholder} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search by name or email..."
+                        placeholderTextColor={colors.placeholder}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         autoCapitalize="none"
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Ionicons name="close-circle" size={20} color="#8E8E93" />
+                            <Ionicons name="close-circle" size={20} color={colors.placeholder} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -134,7 +138,7 @@ export default function UsersListScreen() {
                 keyExtractor={(item, index) => loading && usersList.length === 0 ? index.toString() : (item as User).id}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={loadUsers} />
+                    <RefreshControl refreshing={loading} onRefresh={loadUsers} tintColor={colors.primary} />
                 }
                 ListEmptyComponent={
                     !loading && filteredUsers.length === 0 ? (
@@ -150,16 +154,16 @@ export default function UsersListScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
-        backgroundColor: '#fff',
+        backgroundColor: '#FF3B30',
         paddingTop: 60,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     headerTop: {
         flexDirection: 'row',
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.inputBackground,
         marginHorizontal: 16,
         marginBottom: 16,
         paddingHorizontal: 12,
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 16,
-        color: '#000',
+        color: colors.text,
     },
     backButton: {
         paddingRight: 16,
@@ -191,12 +195,13 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: '#fff',
     },
     listContent: {
         padding: 16,
     },
     userCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
@@ -213,10 +218,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 4,
+        color: colors.text,
     },
     userEmail: {
         fontSize: 14,
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 8,
     },
     roleBadge: {
@@ -243,7 +249,7 @@ const styles = StyleSheet.create({
     },
     userStats: {
         borderTopWidth: 1,
-        borderTopColor: '#F2F2F7',
+        borderTopColor: colors.border,
         paddingTop: 12,
     },
     statRow: {
@@ -256,17 +262,17 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#007AFF',
+        color: colors.primary,
     },
     statLabel: {
         fontSize: 10,
-        color: '#666',
+        color: colors.placeholder,
     },
     emptyContainer: {
         padding: 20,
         alignItems: 'center',
     },
     emptyText: {
-        color: '#999',
+        color: colors.placeholder,
     }
 });

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axiosInstance from '../../services/api/axiosInstance';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Notification {
     id: string;
@@ -19,14 +20,13 @@ export default function NotificationsScreen() {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const router = useRouter();
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const fetchNotifications = async () => {
         try {
             const response = await axiosInstance.get('/notifications?limit=50');
             setNotifications(response.data.notifications);
-            // Also update badge count when we fetch (since we might have just read them by opening the screen?)
-            // Actually, we usually mark all as read only if we implement a "mark all read" feature.
-            // For now, we only mark as read on click.
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         }
@@ -35,7 +35,6 @@ export default function NotificationsScreen() {
     const markAsRead = async (id: string) => {
         try {
             await axiosInstance.put(`/notifications/${id}/read`);
-            // Update local state
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
             DeviceEventEmitter.emit('notifications_updated');
         } catch (error) {
@@ -103,8 +102,8 @@ export default function NotificationsScreen() {
                 <View style={styles.iconContainer}>
                     <Ionicons
                         name="notifications"
-                        size={20} // Reduced size
-                        color={item.isRead ? '#8E8E93' : '#007AFF'}
+                        size={20}
+                        color={item.isRead ? colors.placeholder : colors.primary}
                     />
                 </View>
                 <View style={styles.contentContainer}>
@@ -133,9 +132,9 @@ export default function NotificationsScreen() {
                 data={notifications}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
                 contentContainerStyle={styles.listContent}
-                ItemSeparatorComponent={() => <View style={{ height: 8 }} />} // Reduced separator
+                ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>No notifications yet</Text>
@@ -146,31 +145,31 @@ export default function NotificationsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
         padding: 12,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
         alignItems: 'center',
-        // Removed padding hack, using SafeAreaView
     },
     headerTitle: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: colors.text,
     },
     listContent: {
-        padding: 12, // Reduced list padding
+        padding: 12,
         paddingBottom: 20,
     },
     card: {
         flexDirection: 'row',
-        backgroundColor: '#fff',
-        borderRadius: 8, // Slightly tighter radius
+        backgroundColor: colors.card,
+        borderRadius: 8,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
@@ -180,13 +179,13 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     unreadCard: {
-        backgroundColor: '#F0F8FF',
+        backgroundColor: colors.inputBackground,
     },
     contentTouchable: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12, // Reduced card padding
+        padding: 12,
     },
     iconContainer: {
         marginRight: 10,
@@ -195,29 +194,29 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     title: {
-        fontSize: 14, // Compact font
+        fontSize: 14,
         fontWeight: '600',
         marginBottom: 2,
-        color: '#000',
+        color: colors.text,
     },
     unreadText: {
         fontWeight: 'bold',
-        color: '#007AFF',
+        color: colors.primary,
     },
     body: {
         fontSize: 12,
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 2,
     },
     date: {
         fontSize: 10,
-        color: '#999',
+        color: colors.placeholder,
     },
     dot: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
         marginLeft: 8,
     },
     deleteButton: {
@@ -225,15 +224,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderLeftWidth: 1,
-        borderLeftColor: '#f0f0f0', // Separator for delete button
-        backgroundColor: '#FAFAFA',
+        borderLeftColor: colors.border,
+        backgroundColor: colors.card,
     },
     emptyContainer: {
         alignItems: 'center',
         marginTop: 60,
     },
     emptyText: {
-        color: '#999',
+        color: colors.placeholder,
         fontSize: 14,
     }
 });

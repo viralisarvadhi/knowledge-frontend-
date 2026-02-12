@@ -12,12 +12,15 @@ import { useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchTickets, redeemTicket, deleteTicket } from '../../features/tickets';
 import { Ticket } from '../../types';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function TicketsScreen() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { list: tickets, loading } = useAppSelector((state) => state.tickets);
     const { user } = useAppSelector((state) => state.auth);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const handleRedeem = (id: string) => {
         router.push({ pathname: '/(user)/ticket-detail', params: { id } });
@@ -55,14 +58,14 @@ export default function TicketsScreen() {
             case 'open': return '#FF9500'; // Orange
             case 'in-progress': return '#007AFF'; // Blue
             case 'resolved': return '#34C759'; // Green
-            default: return '#000';
+            default: return colors.text;
         }
     };
 
     const renderTicket = ({ item }: { item: Ticket }) => {
         const isOwner = item.traineeId === user?.id;
         const isAssigned = item.redeemedBy === user?.id;
-        const hasPendingSolution = item.status === 'in-progress' && item.solution?.status === 'pending';
+        const hasPendingSolution = item.solution?.status === 'pending';
         const isAdmin = user?.role === 'admin';
 
         return (
@@ -73,7 +76,7 @@ export default function TicketsScreen() {
                     </Text>
                     <View style={{ flexDirection: 'row', gap: 4 }}>
                         {isOwner && (
-                            <View style={[styles.badge, { backgroundColor: '#007AFF' }]}>
+                            <View style={[styles.badge, { backgroundColor: colors.tint }]}>
                                 <Text style={styles.badgeText}>My Ticket</Text>
                             </View>
                         )}
@@ -84,8 +87,8 @@ export default function TicketsScreen() {
                         )}
                         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
                             <Text style={styles.statusText}>
-                                {item.status === 'in-progress' && item.solution?.status === 'pending'
-                                    ? 'In Progress' // Explicitly show "In Progress" for pending approval
+                                {item.status === 'in-progress' && hasPendingSolution
+                                    ? 'In Progress'
                                     : item.status}
                             </Text>
                         </View>
@@ -135,12 +138,8 @@ export default function TicketsScreen() {
 
             <FlatList
                 data={tickets.filter(ticket => {
-                    // Filter out deleted tickets
                     if (ticket.deletedAt) return false;
-
                     if (ticket.status !== 'resolved') return true;
-                    // "Show resolved tickets only if resolved within the last 30 minutes"
-                    // "Use resolved_at if present, otherwise fallback to updated_at"
                     const resolutionTime = (ticket as any).resolvedAt || ticket.updatedAt;
                     if (!resolutionTime) return true;
                     const diff = new Date().getTime() - new Date(resolutionTime).getTime();
@@ -151,7 +150,7 @@ export default function TicketsScreen() {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={loadTickets} />
+                    <RefreshControl refreshing={loading} onRefresh={loadTickets} tintColor={colors.primary} />
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
@@ -164,10 +163,10 @@ export default function TicketsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -175,20 +174,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         paddingTop: 60,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: colors.text,
     },
     listContent: {
         padding: 16,
         flexGrow: 1,
     },
     ticketCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
@@ -209,6 +209,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         flex: 1,
         marginRight: 8,
+        color: colors.text,
     },
     statusBadge: {
         paddingHorizontal: 12,
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     },
     ticketDescription: {
         fontSize: 14,
-        color: '#666',
+        color: colors.placeholder,
     },
     emptyContainer: {
         flex: 1,
@@ -233,12 +234,12 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#666',
+        color: colors.text,
         marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
-        color: '#999',
+        color: colors.placeholder,
     },
     actionContainer: {
         marginTop: 12,
@@ -252,13 +253,13 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     redeemButton: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
     },
     solveButton: {
-        backgroundColor: '#34C759',
+        backgroundColor: colors.success,
     },
     deleteButton: {
-        backgroundColor: '#FF3B30',
+        backgroundColor: colors.danger,
     },
     actionButtonText: {
         color: '#fff',

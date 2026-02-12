@@ -6,6 +6,7 @@ import { fetchTickets, deleteTicket } from '../../../features/tickets';
 import { Ionicons } from '@expo/vector-icons';
 import Skeleton from '../../../components/Skeleton';
 import { Ticket } from '../../../types';
+import { useTheme } from '../../../context/ThemeContext';
 
 export default function AdminTicketListScreen() {
     const { status } = useLocalSearchParams<{ status: string }>(); // 'all', 'open', 'in-progress', 'resolved'
@@ -13,6 +14,8 @@ export default function AdminTicketListScreen() {
     const router = useRouter();
     const { list, loading } = useAppSelector((state) => state.tickets);
     const [selectedTag, setSelectedTag] = useState('All');
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     useEffect(() => {
         dispatch(fetchTickets());
@@ -44,7 +47,7 @@ export default function AdminTicketListScreen() {
             case 'open': return '#34C759';
             case 'in-progress': return '#FF9500';
             case 'resolved': return '#8E8E93';
-            default: return '#000';
+            default: return colors.text;
         }
     };
 
@@ -77,7 +80,7 @@ export default function AdminTicketListScreen() {
                 <Skeleton width={50} height={18} borderRadius={4} style={{ marginRight: 6 }} />
             </View>
 
-            <View style={[styles.detailsContainer, { paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F2F2F7' }]}>
+            <View style={[styles.detailsContainer, { paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }]}>
                 <Skeleton width="50%" height={12} style={{ marginBottom: 4 }} />
                 <Skeleton width="40%" height={12} />
             </View>
@@ -132,7 +135,7 @@ export default function AdminTicketListScreen() {
             <View style={styles.header}>
                 <View style={styles.headerTop}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#000" />
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>{getTitle()}</Text>
                 </View>
@@ -169,7 +172,7 @@ export default function AdminTicketListScreen() {
                 keyExtractor={(item, index) => loading && list.length === 0 ? index.toString() : (item as Ticket).id}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={() => dispatch(fetchTickets())} />
+                    <RefreshControl refreshing={loading} onRefresh={() => dispatch(fetchTickets())} tintColor={colors.primary} />
                 }
                 ListEmptyComponent={
                     !loading && filteredTickets.length === 0 ? (
@@ -188,16 +191,16 @@ export default function AdminTicketListScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
-        backgroundColor: '#fff',
+        backgroundColor: '#FF3B30',
         paddingTop: 60,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     headerTop: {
         flexDirection: 'row',
@@ -213,15 +216,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.inputBackground,
         marginRight: 8,
     },
     selectedTagBadge: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
     },
     tagText: {
         fontSize: 14,
-        color: '#8E8E93',
+        color: colors.placeholder,
     },
     selectedTagText: {
         color: '#fff',
@@ -233,12 +236,13 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: '#fff',
     },
     listContent: {
         padding: 16,
     },
     ticketCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
@@ -259,6 +263,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         flex: 1,
         marginRight: 8,
+        color: colors.text,
     },
     statusBadge: {
         paddingHorizontal: 12,
@@ -272,7 +277,7 @@ const styles = StyleSheet.create({
     },
     ticketDescription: {
         fontSize: 14,
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 12,
     },
     cardTags: {
@@ -294,12 +299,12 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         borderTopWidth: 1,
-        borderTopColor: '#F2F2F7',
+        borderTopColor: colors.border,
         paddingTop: 8,
     },
     detailText: {
         fontSize: 12,
-        color: '#999',
+        color: colors.placeholder,
         marginBottom: 2,
     },
     emptyContainer: {
@@ -307,14 +312,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     emptyText: {
-        color: '#999',
+        color: colors.placeholder,
     },
     actionContainer: {
         marginTop: 12,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         borderTopWidth: 1,
-        borderTopColor: '#F2F2F7',
+        borderTopColor: colors.border,
         paddingTop: 12,
     },
     actionButton: {

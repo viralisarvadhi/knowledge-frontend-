@@ -11,12 +11,10 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { redeemTicket } from '../../features/tickets';
+import { ImageViewerModal } from '../../components';
+import { useTheme } from '../../context/ThemeContext';
 
 const API_ROOT = (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '');
-
-import { ImageViewerModal } from '../../components';
-
-// ... existing imports
 
 export default function TicketDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,12 +27,15 @@ export default function TicketDetailScreen() {
     const { list: tickets, loading: ticketsLoading } = useAppSelector((state) => state.tickets);
     const ticket = tickets.find((t) => t.id === id);
 
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
+
     const isOwner = ticket?.traineeId === user?.id;
 
     if (!ticket) {
         return (
             <View style={styles.center}>
-                <Text>Ticket not found</Text>
+                <Text style={{ color: colors.text }}>Ticket not found</Text>
             </View>
         );
     }
@@ -46,7 +47,6 @@ export default function TicketDetailScreen() {
 
     const handleWriteSolution = async () => {
         try {
-            // "When user click write solution then only ticket taged in progress"
             await dispatch(redeemTicket(ticket.id)).unwrap();
             router.push({
                 pathname: '/(user)/write-solution',
@@ -99,8 +99,8 @@ export default function TicketDetailScreen() {
                         <View style={[styles.section, styles.solutionContainer]}>
                             {/* Header / Status Banner */}
                             <Text style={[styles.label, {
-                                color: ticket.solution.status === 'approved' ? '#34C759' :
-                                    ticket.solution.status === 'rejected' ? '#FF3B30' : '#007AFF'
+                                color: ticket.solution.status === 'approved' ? colors.success :
+                                    ticket.solution.status === 'rejected' ? colors.danger : colors.primary
                             }]}>
                                 {ticket.solution.status === 'approved' ? 'Solution Provided' :
                                     ticket.solution.status === 'rejected' ? 'Solution Rejected' : 'Solution Submitted, Awaiting Admin Approval'}
@@ -108,7 +108,6 @@ export default function TicketDetailScreen() {
 
                             {/* Content Visibility Rules */}
                             {ticket.solution.status === 'approved' ? (
-                                // Fully Visible for Approved
                                 <>
                                     <View style={styles.solutionSection}>
                                         <Text style={styles.solutionLabel}>Root Cause</Text>
@@ -128,16 +127,14 @@ export default function TicketDetailScreen() {
                                     )}
                                 </>
                             ) : ticket.solution.status === 'pending' ? (
-                                // Hidden for Pending
                                 <View style={styles.solutionSection}>
-                                    <Text style={[styles.solutionText, { fontStyle: 'italic', color: '#666' }]}>
+                                    <Text style={[styles.solutionText, { fontStyle: 'italic', color: colors.placeholder }]}>
                                         Solution details are hidden until approved by an administrator.
                                     </Text>
                                 </View>
                             ) : (
-                                // Rejected State
                                 <View style={styles.solutionSection}>
-                                    <Text style={[styles.solutionText, { fontStyle: 'italic', color: '#FF3B30' }]}>
+                                    <Text style={[styles.solutionText, { fontStyle: 'italic', color: colors.danger }]}>
                                         Your solution was rejected. Please review and submit a new solution.
                                     </Text>
                                 </View>
@@ -168,15 +165,16 @@ export default function TicketDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -184,19 +182,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         paddingTop: 60,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: colors.text,
     },
     backButton: {
         padding: 8,
     },
     backButtonText: {
-        color: '#007AFF',
+        color: colors.primary,
         fontSize: 16,
     },
     scrollContent: {
@@ -210,7 +209,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: '#8E8E93',
+        color: colors.placeholder,
         textTransform: 'uppercase',
         marginBottom: 8,
         fontWeight: '600',
@@ -218,12 +217,12 @@ const styles = StyleSheet.create({
     titleText: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#000',
+        color: colors.text,
     },
     descriptionText: {
         fontSize: 16,
         lineHeight: 24,
-        color: '#333',
+        color: colors.text,
     },
     imageScroll: {
         marginTop: 8,
@@ -233,15 +232,15 @@ const styles = StyleSheet.create({
         height: 250,
         borderRadius: 12,
         marginRight: 12,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: colors.border,
     },
     button: {
-        backgroundColor: '#34C759', // Green for positive action
+        backgroundColor: colors.success,
         padding: 18,
         borderRadius: 12,
         alignItems: 'center',
         marginTop: 20,
-        shadowColor: '#34C759',
+        shadowColor: colors.success,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
@@ -256,11 +255,11 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     solutionContainer: {
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.inputBackground,
         padding: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E5E5EA',
+        borderColor: colors.border,
     },
     solutionSection: {
         marginTop: 12,
@@ -268,11 +267,11 @@ const styles = StyleSheet.create({
     solutionLabel: {
         fontSize: 12,
         fontWeight: 'bold',
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 4,
     },
     solutionText: {
         fontSize: 16,
-        color: '#000',
+        color: colors.text,
     },
 });

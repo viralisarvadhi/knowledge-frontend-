@@ -12,12 +12,15 @@ import {
 import { useAppDispatch, useAppSelector } from '../../store';
 import { Link } from 'expo-router';
 import { login, clearError } from '../../features/auth';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const dispatch = useAppDispatch();
     const { loading } = useAppSelector((state) => state.auth);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -27,7 +30,6 @@ export default function LoginScreen() {
 
         try {
             await dispatch(login({ email, password })).unwrap();
-            // Navigation is handled by RootLayout based on token state
         } catch (err: any) {
             Alert.alert('Login Failed', err);
         }
@@ -51,7 +53,7 @@ export default function LoginScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.placeholder}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -61,7 +63,7 @@ export default function LoginScreen() {
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.placeholder}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={true}
@@ -89,10 +91,10 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
     content: {
         flex: 1,
@@ -103,24 +105,25 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: 'bold',
         marginBottom: 8,
-        color: '#000',
+        color: colors.text,
     },
     subtitle: {
         fontSize: 16,
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 32,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: colors.border,
         borderRadius: 8,
         padding: 16,
         marginBottom: 16,
         fontSize: 16,
-        color: '#000'
+        color: colors.text,
+        backgroundColor: colors.inputBackground,
     },
     button: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
         padding: 16,
         borderRadius: 8,
         alignItems: 'center',
@@ -139,11 +142,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     linkText: {
-        color: '#666',
+        color: colors.placeholder,
         fontSize: 14,
     },
     linkTextBold: {
-        color: '#007AFF',
+        color: colors.primary,
         fontWeight: '600',
     },
 });

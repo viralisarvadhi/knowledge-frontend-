@@ -15,6 +15,8 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { createTicket } from '../../features/tickets';
+import { useTheme } from '../../context/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CreateTicketScreen() {
     const [title, setTitle] = useState('');
@@ -23,10 +25,12 @@ export default function CreateTicketScreen() {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { loading } = useAppSelector((state) => state.tickets);
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: true,
             quality: 1,
         });
@@ -99,7 +103,7 @@ export default function CreateTicketScreen() {
                         placeholder="Brief description of the issue"
                         value={title}
                         onChangeText={setTitle}
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                     />
 
                     <Text style={styles.label}>Description</Text>
@@ -111,16 +115,18 @@ export default function CreateTicketScreen() {
                         multiline
                         numberOfLines={6}
                         textAlignVertical="top"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.placeholder}
                     />
 
                     <Text style={styles.label}>Attachments</Text>
                     <View style={styles.imagePickerContainer}>
                         <TouchableOpacity style={styles.pickerButton} onPress={takePhoto}>
-                            <Text style={styles.pickerButtonText}>📷 Take Photo</Text>
+                            <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                            <Text style={styles.pickerButtonText}>Take Photo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.pickerButton} onPress={pickImage}>
-                            <Text style={styles.pickerButtonText}>🖼️  Gallery</Text>
+                            <Ionicons name="images-outline" size={20} color={colors.primary} />
+                            <Text style={styles.pickerButtonText}>Gallery</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -133,7 +139,7 @@ export default function CreateTicketScreen() {
                                         style={styles.removeBadge}
                                         onPress={() => removeImage(index)}
                                     >
-                                        <Text style={styles.removeText}>✕</Text>
+                                        <Ionicons name="close" size={12} color="#fff" />
                                     </TouchableOpacity>
                                 </View>
                             ))}
@@ -155,22 +161,23 @@ export default function CreateTicketScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
     header: {
         padding: 16,
         paddingTop: 60,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
         alignItems: 'center'
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: colors.text,
     },
     scrollContent: {
         flexGrow: 1,
@@ -182,15 +189,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 8,
-        color: '#000',
+        color: colors.text,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: colors.border,
         borderRadius: 8,
         padding: 16,
         marginBottom: 20,
         fontSize: 16,
+        color: colors.text,
+        backgroundColor: colors.inputBackground,
     },
     textArea: {
         height: 150,
@@ -203,14 +212,17 @@ const styles = StyleSheet.create({
     pickerButton: {
         flex: 1,
         borderWidth: 1,
-        borderColor: '#007AFF',
+        borderColor: colors.primary,
         borderRadius: 8,
         padding: 12,
         alignItems: 'center',
         borderStyle: 'dashed',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
     },
     pickerButtonText: {
-        color: '#007AFF',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '500',
     },
@@ -225,28 +237,23 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 8,
-        backgroundColor: '#eee',
+        backgroundColor: colors.border,
     },
     removeBadge: {
         position: 'absolute',
         top: -8,
         right: -8,
-        backgroundColor: '#FF3B30',
+        backgroundColor: colors.danger,
         width: 20,
         height: 20,
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#fff',
-    },
-    removeText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
+        borderColor: colors.card,
     },
     button: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
         padding: 16,
         borderRadius: 8,
         alignItems: 'center',

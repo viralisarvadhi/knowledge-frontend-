@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, Image, Alert, ActivityIndicator, Switch, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { logout, updateUser, getMe } from '../../features/auth';
@@ -7,6 +7,7 @@ import { fetchTickets } from '../../features/tickets';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import axiosInstance from '../../services/api/axiosInstance';
+import { useTheme } from '../../context/ThemeContext';
 
 // Avatar upload service
 const uploadAvatar = async (uri: string) => {
@@ -25,7 +26,7 @@ const uploadAvatar = async (uri: string) => {
 
 export default function ProfileScreen() {
     const dispatch = useAppDispatch();
-    const router = useRouter(); // Add router
+    const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
     const { list: tickets, loading: ticketsLoading } = useAppSelector((state) => state.tickets);
     const [refreshing, setRefreshing] = useState(false);
@@ -33,6 +34,9 @@ export default function ProfileScreen() {
     const [activeTab, setActiveTab] = useState<'created' | 'resolved'>('created');
     const [showAllCreated, setShowAllCreated] = useState(false);
     const [showAllRedeemed, setShowAllRedeemed] = useState(false);
+
+    const { theme, toggleTheme, colors } = useTheme();
+    const styles = getStyles(colors);
 
     useEffect(() => {
         dispatch(fetchTickets());
@@ -73,7 +77,7 @@ export default function ProfileScreen() {
         setUploading(true);
         try {
             const response = await axiosInstance.delete('/users/avatar');
-            dispatch(updateUser(response.data.user)); // Assuming backend returns updated user
+            dispatch(updateUser(response.data.user));
             Alert.alert('Success', 'Profile picture removed');
         } catch (error: any) {
             Alert.alert('Error', error.response?.data?.message || 'Failed to remove avatar');
@@ -155,14 +159,11 @@ export default function ProfileScreen() {
         dispatch(logout());
     };
 
-    // Derived stats
     const createdTickets = tickets.filter(t => t.traineeId === user?.id);
     const redeemedTickets = tickets.filter(t => t.redeemedBy === user?.id);
 
     const createdCount = createdTickets.length;
     const resolvedCount = redeemedTickets.length;
-    // Fix: redeemedBy is a string ID in state. 
-    const inProgressCount = tickets.filter(t => t.status === 'in-progress' && t.redeemedBy === user?.id).length;
 
     const displayedCreatedTickets = showAllCreated ? createdTickets : createdTickets.slice(0, 5);
     const displayedRedeemedTickets = showAllRedeemed ? redeemedTickets : redeemedTickets.slice(0, 5);
@@ -171,7 +172,7 @@ export default function ProfileScreen() {
         <ScrollView
             style={styles.container}
             refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
             }
         >
             <View style={styles.header}>
@@ -182,7 +183,7 @@ export default function ProfileScreen() {
                             style={styles.avatar}
                         />
                     ) : (
-                        <View style={[styles.avatarPlaceholder, { backgroundColor: '#007AFF' }]}>
+                        <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
                             <Text style={styles.avatarText}>
                                 {user?.name?.charAt(0).toUpperCase() || 'U'}
                             </Text>
@@ -222,6 +223,21 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.section}>
+                <View style={styles.themeRow}>
+                    <View style={styles.themeLeft}>
+                        <Ionicons name={theme === 'dark' ? 'moon' : 'sunny'} size={24} color={colors.text} />
+                        <Text style={styles.themeText}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</Text>
+                    </View>
+                    <Switch
+                        value={theme === 'dark'}
+                        onValueChange={toggleTheme}
+                        trackColor={{ false: '#767577', true: colors.primary }}
+                        thumbColor={Platform.OS === 'ios' ? '#fff' : '#f4f3f4'}
+                    />
+                </View>
+            </View>
+
+            <View style={styles.section}>
                 <View style={styles.tabContainer}>
                     <TouchableOpacity
                         style={[styles.tab, activeTab === 'created' && styles.activeTab]}
@@ -246,7 +262,7 @@ export default function ProfileScreen() {
                         {displayedCreatedTickets.map(ticket => (
                             <TouchableOpacity
                                 key={ticket.id}
-                                style={[styles.ticketItem, ticket.deletedAt && { opacity: 0.6 }]} // Fade out deleted tickets
+                                style={[styles.ticketItem, ticket.deletedAt && { opacity: 0.6 }]}
                                 onPress={() => !ticket.deletedAt && router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
                                 disabled={!!ticket.deletedAt}
                             >
@@ -273,7 +289,7 @@ export default function ProfileScreen() {
                                 <Text style={styles.showMoreText}>
                                     {showAllCreated ? 'Show Less' : `Show More (${createdCount - 5} others)`}
                                 </Text>
-                                <Ionicons name={showAllCreated ? "chevron-up" : "chevron-down"} size={16} color="#007AFF" />
+                                <Ionicons name={showAllCreated ? "chevron-up" : "chevron-down"} size={16} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                     </>
@@ -313,7 +329,7 @@ export default function ProfileScreen() {
                                 <Text style={styles.showMoreText}>
                                     {showAllRedeemed ? 'Show Less' : `Show More (${resolvedCount - 5} others)`}
                                 </Text>
-                                <Ionicons name={showAllRedeemed ? "chevron-up" : "chevron-down"} size={16} color="#007AFF" />
+                                <Ionicons name={showAllRedeemed ? "chevron-up" : "chevron-down"} size={16} color={colors.primary} />
                             </TouchableOpacity>
                         )}
                     </>
@@ -344,27 +360,27 @@ const getApprovalColor = (status: string | undefined) => {
     switch (status) {
         case 'approved': return '#34C759';
         case 'rejected': return '#FF3B30';
-        default: return '#007AFF'; // pending - Blue to match In Progress
+        default: return '#007AFF';
     }
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: colors.background,
     },
     header: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         padding: 24,
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     avatarContainer: {
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
@@ -394,14 +410,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
         width: 32,
         height: 32,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#fff',
+        borderColor: colors.card,
     },
     avatarText: {
         color: '#fff',
@@ -412,36 +428,20 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 4,
+        color: colors.text,
     },
     role: {
         fontSize: 14,
-        color: '#666',
+        color: colors.placeholder,
         marginBottom: 8,
         fontWeight: '600',
-    },
-    email: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 8,
-    },
-    roleBadge: {
-        backgroundColor: '#E5E5EA',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
-        marginBottom: 12,
-    },
-    roleText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#666',
     },
     creditsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 8,
         padding: 8,
-        backgroundColor: '#FFF9C4',
+        backgroundColor: colors.inputBackground, // Use safe background
         borderRadius: 8,
     },
     creditsText: {
@@ -452,12 +452,12 @@ const styles = StyleSheet.create({
     },
     statsContainer: {
         flexDirection: 'row',
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         marginTop: 20,
         padding: 16,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#E5E5EA',
+        borderColor: colors.border,
     },
     statItem: {
         flex: 1,
@@ -466,30 +466,30 @@ const styles = StyleSheet.create({
     statValue: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#007AFF',
+        color: colors.primary,
         marginBottom: 4,
     },
     statLabel: {
         fontSize: 12,
-        color: '#666',
+        color: colors.placeholder,
     },
     statDivider: {
         width: 1,
-        backgroundColor: '#E5E5EA',
+        backgroundColor: colors.border,
         height: '80%',
         alignSelf: 'center',
     },
     section: {
         marginTop: 20,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#E5E5EA',
+        borderColor: colors.border,
     },
     sectionTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#666',
+        color: colors.placeholder,
         padding: 16,
         paddingBottom: 8,
         textTransform: 'uppercase',
@@ -499,16 +499,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         borderTopWidth: 1,
-        borderTopColor: '#E5E5EA',
+        borderTopColor: colors.border,
     },
     menuText: {
         fontSize: 16,
         marginLeft: 12,
+        color: colors.text,
     },
     tabContainer: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     tab: {
         flex: 1,
@@ -517,21 +518,21 @@ const styles = StyleSheet.create({
     },
     activeTab: {
         borderBottomWidth: 2,
-        borderBottomColor: '#007AFF',
+        borderBottomColor: colors.primary,
     },
     tabText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#8E8E93',
+        color: colors.placeholder,
     },
     activeTabText: {
-        color: '#007AFF',
+        color: colors.primary,
     },
     ticketItem: {
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
-        backgroundColor: '#fff',
+        borderBottomColor: colors.border,
+        backgroundColor: colors.card,
     },
     ticketHeader: {
         flexDirection: 'row',
@@ -544,10 +545,11 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         flex: 1,
         marginRight: 8,
+        color: colors.text,
     },
     ticketDate: {
         fontSize: 12,
-        color: '#8E8E93',
+        color: colors.placeholder,
     },
     statusBadge: {
         paddingHorizontal: 8,
@@ -565,16 +567,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 12,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E5EA',
+        borderBottomColor: colors.border,
     },
     showMoreText: {
-        color: '#007AFF',
+        color: colors.primary,
         fontSize: 14,
         fontWeight: '600',
         marginRight: 4,
     },
+    themeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+    },
+    themeLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    themeText: {
+        fontSize: 16,
+        marginLeft: 12,
+        color: colors.text,
+    },
 });
-
-

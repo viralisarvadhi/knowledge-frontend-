@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert, DeviceEventEmitter } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import axiosInstance from '../../services/api/axiosInstance';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -23,6 +24,9 @@ export default function NotificationsScreen() {
         try {
             const response = await axiosInstance.get('/notifications?limit=50');
             setNotifications(response.data.notifications);
+            // Also update badge count when we fetch (since we might have just read them by opening the screen?)
+            // Actually, we usually mark all as read only if we implement a "mark all read" feature.
+            // For now, we only mark as read on click.
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         }
@@ -33,6 +37,7 @@ export default function NotificationsScreen() {
             await axiosInstance.put(`/notifications/${id}/read`);
             // Update local state
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+            DeviceEventEmitter.emit('notifications_updated');
         } catch (error) {
             console.error('Failed to mark as read:', error);
         }
@@ -51,6 +56,7 @@ export default function NotificationsScreen() {
                         try {
                             await axiosInstance.delete(`/notifications/${id}`);
                             setNotifications(prev => prev.filter(n => n.id !== id));
+                            DeviceEventEmitter.emit('notifications_updated');
                         } catch (error) {
                             console.error('Failed to delete notification:', error);
                             Alert.alert('Error', 'Failed to delete notification');
@@ -97,7 +103,7 @@ export default function NotificationsScreen() {
                 <View style={styles.iconContainer}>
                     <Ionicons
                         name="notifications"
-                        size={24}
+                        size={20} // Reduced size
                         color={item.isRead ? '#8E8E93' : '#007AFF'}
                     />
                 </View>
@@ -113,15 +119,15 @@ export default function NotificationsScreen() {
                 style={styles.deleteButton}
                 onPress={() => deleteNotification(item.id)}
             >
-                <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                <Ionicons name="trash-outline" size={18} color="#FF3B30" />
             </TouchableOpacity>
         </View>
     );
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Notifications</Text>
+                <Text style={styles.headerTitle}>Notifications ({notifications.length})</Text>
             </View>
             <FlatList
                 data={notifications}
@@ -129,13 +135,14 @@ export default function NotificationsScreen() {
                 keyExtractor={item => item.id}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 contentContainerStyle={styles.listContent}
+                ItemSeparatorComponent={() => <View style={{ height: 8 }} />} // Reduced separator
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>No notifications yet</Text>
                     </View>
                 }
             />
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -145,52 +152,52 @@ const styles = StyleSheet.create({
         backgroundColor: '#F2F2F7',
     },
     header: {
-        padding: 16,
-        paddingTop: 60,
+        padding: 12,
         backgroundColor: '#fff',
         borderBottomWidth: 1,
         borderBottomColor: '#E5E5EA',
-        alignItems: 'center'
+        alignItems: 'center',
+        // Removed padding hack, using SafeAreaView
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     listContent: {
-        padding: 16,
+        padding: 12, // Reduced list padding
+        paddingBottom: 20,
     },
     card: {
         flexDirection: 'row',
         backgroundColor: '#fff',
-        borderRadius: 12,
-        marginBottom: 12,
+        borderRadius: 8, // Slightly tighter radius
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.05,
         shadowRadius: 2,
-        elevation: 2,
-        overflow: 'hidden', // Ensure children don't overflow
+        elevation: 1,
+        overflow: 'hidden',
     },
     unreadCard: {
-        backgroundColor: '#F0F8FF', // Light blue tint
+        backgroundColor: '#F0F8FF',
     },
     contentTouchable: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
+        padding: 12, // Reduced card padding
     },
     iconContainer: {
-        marginRight: 16,
+        marginRight: 10,
     },
     contentContainer: {
         flex: 1,
     },
     title: {
-        fontSize: 16,
+        fontSize: 14, // Compact font
         fontWeight: '600',
-        marginBottom: 4,
+        marginBottom: 2,
         color: '#000',
     },
     unreadText: {
@@ -198,33 +205,35 @@ const styles = StyleSheet.create({
         color: '#007AFF',
     },
     body: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#666',
-        marginBottom: 4,
+        marginBottom: 2,
     },
     date: {
-        fontSize: 12,
+        fontSize: 10,
         color: '#999',
     },
     dot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
         backgroundColor: '#007AFF',
         marginLeft: 8,
     },
     deleteButton: {
-        padding: 16,
+        padding: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100%',
+        borderLeftWidth: 1,
+        borderLeftColor: '#f0f0f0', // Separator for delete button
+        backgroundColor: '#FAFAFA',
     },
     emptyContainer: {
         alignItems: 'center',
-        marginTop: 100,
+        marginTop: 60,
     },
     emptyText: {
         color: '#999',
-        fontSize: 16,
+        fontSize: 14,
     }
 });

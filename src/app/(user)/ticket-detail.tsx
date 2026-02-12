@@ -145,7 +145,7 @@ export default function TicketDetailScreen() {
                         </View>
                     )}
 
-                    {ticket.status !== 'resolved' && (!ticket.solution || ticket.solution.status === 'rejected') && !isOwner && (
+                    {ticket.status !== 'resolved' && (!ticket.solution || ticket.solution.status === 'rejected') && (
                         <TouchableOpacity
                             style={[styles.button, ticketsLoading && styles.buttonDisabled]}
                             onPress={handleWriteSolution}

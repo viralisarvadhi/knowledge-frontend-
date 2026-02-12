@@ -17,7 +17,7 @@ import { useTheme } from '../../context/ThemeContext';
 const API_ROOT = (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '');
 
 export default function TicketDetailScreen() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id, source } = useLocalSearchParams<{ id: string; source?: string }>();
     const router = useRouter();
     const dispatch = useAppDispatch();
     const [modalVisible, setModalVisible] = React.useState(false);
@@ -50,17 +50,29 @@ export default function TicketDetailScreen() {
             await dispatch(redeemTicket(ticket.id)).unwrap();
             router.push({
                 pathname: '/(user)/write-solution',
-                params: { ticketId: ticket.id }
+                params: { ticketId: ticket.id, source }
             });
         } catch (err: any) {
             Alert.alert('Error', err || 'Failed to redeem ticket');
         }
     };
 
+    const handleBack = () => {
+        if (source) {
+            // Navigate back to the source tab
+            router.push(`/(tabs)/${source}`);
+        } else if (router.canGoBack()) {
+            router.back();
+        } else {
+            // Fallback to tickets tab
+            router.push('/(tabs)/tickets');
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                     <Text style={styles.backButtonText}>← Back</Text>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Ticket Details</Text>

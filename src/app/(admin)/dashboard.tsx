@@ -127,7 +127,7 @@ export default function AdminDashboard() {
                     <View style={styles.themeRow}>
                         <View style={styles.themeLeft}>
                             <Ionicons name={theme === 'dark' ? 'moon' : 'sunny'} size={24} color={colors.text} />
-                            <Text style={styles.themeText}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</Text>
+                            <Text style={styles.themeText}>dark mode</Text>
                         </View>
                         <Switch
                             value={theme === 'dark'}

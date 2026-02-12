@@ -72,7 +72,7 @@ export default function NotificationsScreen() {
         }
 
         if (notification.data?.ticketId) {
-            router.push(`/(user)/ticket-detail?id=${notification.data.ticketId}`);
+            router.push(`/(user)/ticket-detail?id=${notification.data.ticketId}&source=notifications`);
         }
     };
 

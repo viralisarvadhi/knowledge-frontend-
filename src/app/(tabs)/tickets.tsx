@@ -23,7 +23,7 @@ export default function TicketsScreen() {
     const styles = getStyles(colors);
 
     const handleRedeem = (id: string) => {
-        router.push({ pathname: '/(user)/ticket-detail', params: { id } });
+        router.push({ pathname: '/(user)/ticket-detail', params: { id, source: 'tickets' } });
     };
 
     const handleContinueSolving = (ticketId: string) => {

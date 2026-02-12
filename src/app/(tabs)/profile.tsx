@@ -226,7 +226,7 @@ export default function ProfileScreen() {
                 <View style={styles.themeRow}>
                     <View style={styles.themeLeft}>
                         <Ionicons name={theme === 'dark' ? 'moon' : 'sunny'} size={24} color={colors.text} />
-                        <Text style={styles.themeText}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</Text>
+                        <Text style={styles.themeText}>dark mode</Text>
                     </View>
                     <Switch
                         value={theme === 'dark'}
@@ -263,7 +263,7 @@ export default function ProfileScreen() {
                             <TouchableOpacity
                                 key={ticket.id}
                                 style={[styles.ticketItem, ticket.deletedAt && { opacity: 0.6 }]}
-                                onPress={() => !ticket.deletedAt && router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
+                                onPress={() => !ticket.deletedAt && router.push(`/(user)/ticket-detail?id=${ticket.id}&source=profile`)}
                                 disabled={!!ticket.deletedAt}
                             >
                                 <View style={styles.ticketHeader}>
@@ -299,7 +299,7 @@ export default function ProfileScreen() {
                             <TouchableOpacity
                                 key={ticket.id}
                                 style={styles.ticketItem}
-                                onPress={() => router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
+                                onPress={() => router.push(`/(user)/ticket-detail?id=${ticket.id}&source=profile`)}
                             >
                                 <View style={styles.ticketHeader}>
                                     <Text style={styles.ticketTitle} numberOfLines={1}>{ticket.title}</Text>

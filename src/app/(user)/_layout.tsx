@@ -23,7 +23,7 @@ export default function UserLayout() {
             />
             <Stack.Screen
                 name="ticket-detail"
-                options={{ title: 'Ticket Details' }}
+                options={{ headerShown: false }}
             />
         </Stack>
     );

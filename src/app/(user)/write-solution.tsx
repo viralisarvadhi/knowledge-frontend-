@@ -18,7 +18,7 @@ import { resolveTicket } from '../../features/tickets';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function WriteSolutionScreen() {
-    const { ticketId } = useLocalSearchParams<{ ticketId: string }>();
+    const { ticketId, source } = useLocalSearchParams<{ ticketId: string; source?: string }>();
     const [rootCause, setRootCause] = useState('');
     const [fixSteps, setFixSteps] = useState('');
     const [preventionNotes, setPreventionNotes] = useState('');
@@ -79,8 +79,23 @@ export default function WriteSolutionScreen() {
 
         try {
             await dispatch(resolveTicket({ ticketId, solutionData })).unwrap();
-            Alert.alert('Success', 'Solution submitted successfully');
-            router.back();
+            Alert.alert('Success', 'Solution submitted successfully', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        // Navigate back to the source tab
+                        if (source) {
+                            router.dismissAll();
+                            router.push(`/(tabs)/${source}`);
+                        } else if (router.canDismiss()) {
+                            router.dismissAll();
+                        } else {
+                            router.back();
+                            router.back();
+                        }
+                    }
+                }
+            ]);
         } catch (err: any) {
             Alert.alert('Error', err);
         }

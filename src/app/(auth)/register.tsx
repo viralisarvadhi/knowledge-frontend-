@@ -65,6 +65,7 @@ export default function RegisterScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="Full Name"
+                        placeholderTextColor="#999"
                         value={name}
                         onChangeText={setName}
                     />
@@ -72,6 +73,7 @@ export default function RegisterScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="Email"
+                        placeholderTextColor="#999"
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
@@ -81,17 +83,19 @@ export default function RegisterScreen() {
                     <TextInput
                         style={styles.input}
                         placeholder="Password (min 8 characters)"
+                        placeholderTextColor="#999"
                         value={password}
                         onChangeText={setPassword}
-                        secureTextEntry
+                        secureTextEntry={true}
                     />
 
                     <TextInput
                         style={styles.input}
                         placeholder="Confirm Password"
+                        placeholderTextColor="#999"
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
-                        secureTextEntry
+                        secureTextEntry={true}
                     />
 
                     <TouchableOpacity
@@ -148,6 +152,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 16,
         fontSize: 16,
+        color: '#000',
     },
     button: {
         backgroundColor: '#007AFF',

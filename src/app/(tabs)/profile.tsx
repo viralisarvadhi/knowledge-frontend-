@@ -30,7 +30,9 @@ export default function ProfileScreen() {
     const { list: tickets, loading: ticketsLoading } = useAppSelector((state) => state.tickets);
     const [refreshing, setRefreshing] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'created' | 'resolved'>('created'); // Add state
+    const [activeTab, setActiveTab] = useState<'created' | 'resolved'>('created');
+    const [showAllCreated, setShowAllCreated] = useState(false);
+    const [showAllRedeemed, setShowAllRedeemed] = useState(false);
 
     useEffect(() => {
         dispatch(fetchTickets());
@@ -154,10 +156,16 @@ export default function ProfileScreen() {
     };
 
     // Derived stats
-    const createdCount = tickets.filter(t => t.traineeId === user?.id).length;
+    const createdTickets = tickets.filter(t => t.traineeId === user?.id);
+    const redeemedTickets = tickets.filter(t => t.redeemedBy === user?.id);
+
+    const createdCount = createdTickets.length;
+    const resolvedCount = redeemedTickets.length;
     // Fix: redeemedBy is a string ID in state. 
-    const resolvedCount = tickets.filter(t => t.redeemedBy === user?.id).length;
     const inProgressCount = tickets.filter(t => t.status === 'in-progress' && t.redeemedBy === user?.id).length;
+
+    const displayedCreatedTickets = showAllCreated ? createdTickets : createdTickets.slice(0, 5);
+    const displayedRedeemedTickets = showAllRedeemed ? redeemedTickets : redeemedTickets.slice(0, 5);
 
     return (
         <ScrollView
@@ -234,55 +242,81 @@ export default function ProfileScreen() {
                 </View>
 
                 {activeTab === 'created' ? (
-                    tickets.filter(t => t.traineeId === user?.id).map(ticket => (
-                        <TouchableOpacity
-                            key={ticket.id}
-                            style={[styles.ticketItem, ticket.deletedAt && { opacity: 0.6 }]} // Fade out deleted tickets
-                            onPress={() => !ticket.deletedAt && router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
-                            disabled={!!ticket.deletedAt}
-                        >
-                            <View style={styles.ticketHeader}>
-                                <Text style={styles.ticketTitle} numberOfLines={1}>{ticket.title}</Text>
-                                {ticket.deletedAt ? (
-                                    <View style={[styles.statusBadge, { backgroundColor: '#FF3B30' }]}>
-                                        <Text style={styles.statusText}>Deleted by Admin</Text>
-                                    </View>
-                                ) : (
-                                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(ticket.status) }]}>
-                                        <Text style={styles.statusText}>{ticket.status}</Text>
-                                    </View>
-                                )}
-                            </View>
-                            <Text style={styles.ticketDate}>{new Date(ticket.createdAt).toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                    ))
+                    <>
+                        {displayedCreatedTickets.map(ticket => (
+                            <TouchableOpacity
+                                key={ticket.id}
+                                style={[styles.ticketItem, ticket.deletedAt && { opacity: 0.6 }]} // Fade out deleted tickets
+                                onPress={() => !ticket.deletedAt && router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
+                                disabled={!!ticket.deletedAt}
+                            >
+                                <View style={styles.ticketHeader}>
+                                    <Text style={styles.ticketTitle} numberOfLines={1}>{ticket.title}</Text>
+                                    {ticket.deletedAt ? (
+                                        <View style={[styles.statusBadge, { backgroundColor: '#FF3B30' }]}>
+                                            <Text style={styles.statusText}>Deleted by Admin</Text>
+                                        </View>
+                                    ) : (
+                                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(ticket.status) }]}>
+                                            <Text style={styles.statusText}>{ticket.status}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                                <Text style={styles.ticketDate}>{new Date(ticket.createdAt).toLocaleDateString()}</Text>
+                            </TouchableOpacity>
+                        ))}
+                        {createdCount > 5 && (
+                            <TouchableOpacity
+                                style={styles.showMoreButton}
+                                onPress={() => setShowAllCreated(!showAllCreated)}
+                            >
+                                <Text style={styles.showMoreText}>
+                                    {showAllCreated ? 'Show Less' : `Show More (${createdCount - 5} others)`}
+                                </Text>
+                                <Ionicons name={showAllCreated ? "chevron-up" : "chevron-down"} size={16} color="#007AFF" />
+                            </TouchableOpacity>
+                        )}
+                    </>
                 ) : (
-                    tickets.filter(t => t.redeemedBy === user?.id).map(ticket => (
-                        <TouchableOpacity
-                            key={ticket.id}
-                            style={styles.ticketItem}
-                            onPress={() => router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
-                        >
-                            <View style={styles.ticketHeader}>
-                                <Text style={styles.ticketTitle} numberOfLines={1}>{ticket.title}</Text>
-                                {ticket.solution ? (
-                                    <View style={[
-                                        styles.statusBadge,
-                                        { backgroundColor: getApprovalColor(ticket.solution.status) }
-                                    ]}>
-                                        <Text style={styles.statusText}>
-                                            {ticket.solution.status === 'pending' ? 'Pending Approval' : ticket.solution.status}
-                                        </Text>
-                                    </View>
-                                ) : (
-                                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(ticket.status) }]}>
-                                        <Text style={styles.statusText}>{ticket.status}</Text>
-                                    </View>
-                                )}
-                            </View>
-                            <Text style={styles.ticketDate}>Updated: {new Date(ticket.updatedAt).toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                    ))
+                    <>
+                        {displayedRedeemedTickets.map(ticket => (
+                            <TouchableOpacity
+                                key={ticket.id}
+                                style={styles.ticketItem}
+                                onPress={() => router.push(`/(user)/ticket-detail?id=${ticket.id}`)}
+                            >
+                                <View style={styles.ticketHeader}>
+                                    <Text style={styles.ticketTitle} numberOfLines={1}>{ticket.title}</Text>
+                                    {ticket.solution ? (
+                                        <View style={[
+                                            styles.statusBadge,
+                                            { backgroundColor: getApprovalColor(ticket.solution.status) }
+                                        ]}>
+                                            <Text style={styles.statusText}>
+                                                {ticket.solution.status === 'pending' ? 'Pending Approval' : ticket.solution.status}
+                                            </Text>
+                                        </View>
+                                    ) : (
+                                        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(ticket.status) }]}>
+                                            <Text style={styles.statusText}>{ticket.status}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                                <Text style={styles.ticketDate}>Updated: {new Date(ticket.updatedAt).toLocaleDateString()}</Text>
+                            </TouchableOpacity>
+                        ))}
+                        {resolvedCount > 5 && (
+                            <TouchableOpacity
+                                style={styles.showMoreButton}
+                                onPress={() => setShowAllRedeemed(!showAllRedeemed)}
+                            >
+                                <Text style={styles.showMoreText}>
+                                    {showAllRedeemed ? 'Show Less' : `Show More (${resolvedCount - 5} others)`}
+                                </Text>
+                                <Ionicons name={showAllRedeemed ? "chevron-up" : "chevron-down"} size={16} color="#007AFF" />
+                            </TouchableOpacity>
+                        )}
+                    </>
                 )}
             </View>
 
@@ -525,6 +559,21 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: 'bold',
         textTransform: 'uppercase',
+    },
+    showMoreButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 12,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5EA',
+    },
+    showMoreText: {
+        color: '#007AFF',
+        fontSize: 14,
+        fontWeight: '600',
+        marginRight: 4,
     },
 });
 

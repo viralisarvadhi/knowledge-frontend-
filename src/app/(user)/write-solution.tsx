@@ -94,6 +94,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="What caused the issue?"
+                        placeholderTextColor="#999"
                         value={rootCause}
                         onChangeText={setRootCause}
                         multiline
@@ -104,6 +105,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="Steps taken to resolve"
+                        placeholderTextColor="#999"
                         value={fixSteps}
                         onChangeText={setFixSteps}
                         multiline
@@ -114,6 +116,7 @@ export default function WriteSolutionScreen() {
                     <TextInput
                         style={[styles.input, styles.textArea]}
                         placeholder="How to prevent recurrence"
+                        placeholderTextColor="#999"
                         value={preventionNotes}
                         onChangeText={setPreventionNotes}
                         multiline
@@ -123,7 +126,8 @@ export default function WriteSolutionScreen() {
                     <Text style={styles.label}>Tags</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Comma separated tags (e.g., network, login, bug)"
+                        placeholder="tags (e.g., network, login, bug)"
+                        placeholderTextColor="#999"
                         value={tags}
                         onChangeText={setTags}
                     />
@@ -134,7 +138,7 @@ export default function WriteSolutionScreen() {
                             <Text style={styles.pickerButtonText}>📷 Take Photo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.pickerButton} onPress={pickImage}>
-                            <Text style={styles.pickerButtonText}>🖼️ Pick from Gallery</Text>
+                            <Text style={styles.pickerButtonText}>🖼️  Gallery</Text>
                         </TouchableOpacity>
                     </View>
 

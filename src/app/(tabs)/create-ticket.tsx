@@ -99,6 +99,7 @@ export default function CreateTicketScreen() {
                         placeholder="Brief description of the issue"
                         value={title}
                         onChangeText={setTitle}
+                        placeholderTextColor="#999"
                     />
 
                     <Text style={styles.label}>Description</Text>
@@ -110,6 +111,7 @@ export default function CreateTicketScreen() {
                         multiline
                         numberOfLines={6}
                         textAlignVertical="top"
+                        placeholderTextColor="#999"
                     />
 
                     <Text style={styles.label}>Attachments</Text>
@@ -118,7 +120,7 @@ export default function CreateTicketScreen() {
                             <Text style={styles.pickerButtonText}>📷 Take Photo</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.pickerButton} onPress={pickImage}>
-                            <Text style={styles.pickerButtonText}>🖼️ Pick from Gallery</Text>
+                            <Text style={styles.pickerButtonText}>🖼️  Gallery</Text>
                         </TouchableOpacity>
                     </View>
 

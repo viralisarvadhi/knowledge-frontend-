@@ -118,7 +118,8 @@ export default function KnowledgeBaseScreen() {
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search solutions by keywords..."
+                    placeholder="Search available solutions..."
+                    placeholderTextColor="#999"
                     value={query}
                     onChangeText={setQuery}
                     autoCapitalize="none"
